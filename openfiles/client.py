@@ -19,7 +19,7 @@ class OpenfilesClient:
     Client for interacting with the Openfiles API.
     """
 
-    BASE_URL = "https://dev.openfiles.xyz"  # Default base URL
+    BASE_URL = "https://openfiles.xyz"  # Default base URL
 
     def __init__(self, api_token: Optional[str] = None, base_url: Optional[str] = None):
         """
