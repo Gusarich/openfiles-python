@@ -5,7 +5,7 @@ A Python SDK for interacting with the Openfiles API.
 ## Installation
 
 ```bash
-pip install openfiles-python
+pip install openfiles
 ```
 
 ## Usage

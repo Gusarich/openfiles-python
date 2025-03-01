@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="openfiles-python",
+    name="openfiles",
     version="1.0.1",
     description="Python SDK for Openfiles API",
     long_description=open("README.md").read(),
