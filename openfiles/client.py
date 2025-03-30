@@ -45,7 +45,7 @@ class OpenfilesClient:
         Returns:
             Dict with authorization headers
         """
-        return {"Authorization": f"Bearer {self.api_token}"}
+        return {"X-Authorization": self.api_token}
 
     def _handle_response(self, response: requests.Response) -> Any:
         """
