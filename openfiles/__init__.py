@@ -4,7 +4,7 @@ Openfiles Python SDK
 
 A Python SDK for interacting with the Openfiles API.
 
-The SDK supports authentication via API token provided directly or 
+The SDK supports authentication via API token provided directly or
 through the OPENFILES_API_TOKEN environment variable.
 
 :copyright: (c) 2025 Openfiles
@@ -29,4 +29,4 @@ __all__ = [
     "ValidationError",
 ]
 
-__version__ = "1.0.1"
+__version__ = "1.1.0"
