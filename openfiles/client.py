@@ -245,3 +245,22 @@ class OpenfilesClient:
 
         response_data = self._handle_response(response)
         return [FileInfoResponse(**item) for item in response_data]
+
+    def add_by_bag_id(self, bag_id: str) -> BagResponse:
+        """
+        Add a file by bag ID.
+
+        Args:
+            bag_id: ID of the bag to use
+
+        Returns:
+            BagResponse with the bag_id
+        """
+        url = f"{self.base_url}/api/bag/add_by_id"
+
+        data = {"bag_id": bag_id}
+
+        response = requests.post(url, headers=self._get_headers(), data=data)
+
+        response_data = self._handle_response(response)
+        return BagResponse(**response_data)
