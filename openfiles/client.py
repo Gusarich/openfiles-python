@@ -7,11 +7,13 @@ import requests
 from typing import List, Optional, Dict, Any, Union
 from pathlib import Path
 
-from .models import (
-    BagResponse,
-    FileInfoResponse,
-    UserResponse,
+from openfiles.exceptions import (
+    OpenfilesAPIError,
+    OpenfilesHTTPError,
+    OpenfilesValidationError,
 )
+
+from .models import BagResponse, FileInfoResponse, UserResponse, HTTPValidationError
 
 
 class OpenfilesClient:
@@ -58,14 +60,61 @@ class OpenfilesClient:
             Parsed response data
 
         Raises:
-            HTTPError: If the response status code indicates an error
+            OpenfilesValidationError: For validation errors
+            OpenfilesAPIError: For API errors with JSON response
+            OpenfilesHTTPError: For other HTTP errors
         """
-        response.raise_for_status()
+        # Check if the response indicates an error
+        if not response.ok:
+            try:
+                error_data = response.json()
 
+                # If response contains validation error structure
+                if "detail" in error_data:
+                    # Check if detail is a string (simple error message)
+                    if isinstance(error_data["detail"], str):
+                        # Simple error message
+                        raise OpenfilesAPIError(response.status_code, error_data)
+                    # Otherwise try to parse as validation error (list of errors)
+                    try:
+                        validation_error = HTTPValidationError(**error_data)
+                        raise OpenfilesValidationError(validation_error)
+                    except Exception:
+                        # If validation error parsing fails, use generic API error
+                        raise OpenfilesAPIError(response.status_code, error_data)
+
+                # Other JSON error responses
+                raise OpenfilesAPIError(response.status_code, error_data)
+
+            except (ValueError, TypeError):
+                # If not JSON or not matching our error model
+                raise OpenfilesHTTPError(response.status_code, response.text)
+
+        # If we got here, the response was successful
         if response.headers.get("Content-Type") == "application/json":
             return response.json()
 
         return response.content
+
+    def _format_validation_errors(self, validation_error: HTTPValidationError) -> str:
+        """
+        Format validation errors for better readability.
+
+        Args:
+            validation_error: The HTTPValidationError object
+
+        Returns:
+            A formatted string with validation errors
+        """
+        if not validation_error.detail:
+            return "Unknown validation error"
+
+        errors = []
+        for error in validation_error.detail:
+            location = " -> ".join(str(loc) for loc in error.loc)
+            errors.append(f"{location}: {error.msg} ({error.type})")
+
+        return "\n".join(errors)
 
     def upload_file(self, file_path: Union[str, Path], description: str) -> BagResponse:
         """
@@ -246,15 +295,12 @@ class OpenfilesClient:
         response_data = self._handle_response(response)
         return [FileInfoResponse(**item) for item in response_data]
 
-    def add_by_bag_id(self, bag_id: str) -> BagResponse:
+    def add_by_bag_id(self, bag_id: str) -> None:
         """
         Add a file by bag ID.
 
         Args:
             bag_id: ID of the bag to use
-
-        Returns:
-            BagResponse with the bag_id
         """
         url = f"{self.base_url}/api/bag/add_by_id"
 
@@ -262,5 +308,4 @@ class OpenfilesClient:
 
         response = requests.post(url, headers=self._get_headers(), data=data)
 
-        response_data = self._handle_response(response)
-        return BagResponse(**response_data)
+        self._handle_response(response)

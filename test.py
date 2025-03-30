@@ -21,6 +21,20 @@ for file in files:
 
 # Download a file
 client.download_file(bag_id=file_bag_id, destination="test/file_copy.txt")
+print("File downloaded")
 
 # Delete a file
 client.delete_file(bag_id=file_bag_id)
+print("File deleted")
+
+# Import file by bag ID
+client.add_by_bag_id(
+    bag_id="85d0998dcf325b6fee4f529d4dcf66fb253fc39c59687c82a0ef7fc96fed4c9f"
+)
+print("File imported")
+
+# Delete file
+client.delete_file(
+    bag_id="85d0998dcf325b6fee4f529d4dcf66fb253fc39c59687c82a0ef7fc96fed4c9f"
+)
+print("File deleted")
